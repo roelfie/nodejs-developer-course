@@ -1,11 +1,27 @@
 /*
- * A weather app that makes use of the darksky.net API.
+ * A weather app that makes use of the darksky and mapbox APIs.
  */ 
-const request = require('request')
+require('dotenv').config({path: '/Users/roelfie/.config/_roelfie/nodejs-developer-course.conf'})
+const chalk = require('chalk')
+const mapbox = require('./utils/mapbox')
+const darksky = require('./utils/darksky')
 
-const url = 'https://api.darksky.net/forecast/098ecebd570eb0bb08b6acbf12629b5b/37.8267,-122.4233'
+const logError = (e) => console.log(chalk.red.inverse(e))
 
-request({url: url}, (error, response) => {
-    const weatherData = JSON.parse(response.body)
-    console.log(weatherData.currently)
+const location = process.argv[2]
+
+if (!location) {
+    return logError("Missing required argument. Provide a location!")
+}
+
+mapbox.geocode(location, (error, geoData) => {
+    if (error) {
+        return logError(error)
+    }
+    darksky.forecast(geoData.longitude, geoData.latitude, (error, forecastData) => {
+        if (error) {
+            return logError(error)
+        }
+        console.log(`Het is nu ${forecastData.summary} in ${geoData.placeName}.\nHet is ${forecastData.temp} graden Celsius.\nEr is ${forecastData.rain}% kans op regen.`)
+    })
 })
