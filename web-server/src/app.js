@@ -5,7 +5,6 @@ const hbs = require('hbs')
 // External APIs
 const mapbox = require('./utils/mapbox')
 const darksky = require('./utils/darksky')
-const ipstack = require('./utils/ipstack')
 
 // Define paths for Express config
 const publicFolder = path.join(__dirname, '../public')
@@ -63,16 +62,6 @@ app.get('/weather', (req, res) => {
             }
             res.send({ location: geoData, forecast })
         })
-    })
-})
-
-// Lookup geo location for ip address
-app.get('/location', (req, res) => {
-    if (!req.query.ip) {
-        return res.send({error: "Please specify an ip address."})
-    }
-    ipstack.lookup(req.query.ip, (location) => {
-        res.send(location)
     })
 })
 
