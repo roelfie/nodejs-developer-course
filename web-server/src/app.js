@@ -1,6 +1,9 @@
+require('dotenv').config({path: '/Users/roelfie/.config/_roelfie/nodejs-developer-course.conf'})
 const path = require('path')
 const express = require('express')
 const hbs = require('hbs')
+const mapbox = require('./utils/mapbox')
+const darksky = require('./utils/darksky')
 
 // Define paths for Express config
 const publicFolder = path.join(__dirname, '../public')
@@ -41,9 +44,22 @@ app.get('/help', (req, res) => {
 })
 
 app.get('/weather', (req, res) => {
-    res.send({
-        forecast: 'It is snowing',
-        location: 'Philadelphia'
+    if (!req.query.location) {
+        return res.send({error: "Please specify a location."})
+    }
+    const location = req.query.location
+
+    mapbox.geocode(location, (error, geoData) => {
+        if (error) {
+            return res.send({error})
+        }
+    
+        darksky.forecast(geoData.longitude, geoData.latitude, (error, forecast) => {
+            if (error) {
+                return res.send({error})
+            }
+            res.send({ location: geoData, forecast })
+        })
     })
 })
 
