@@ -14,17 +14,15 @@ if (!location) {
     return logError("Missing required argument. Provide a location!")
 }
 
-mapbox.geocode(location, (error, geoData) => {
+mapbox.geocode(location, (error, {longitude, latitude, placeName}) => {
     if (error) {
         return logError(error)
     }
-    
-    darksky.forecast(geoData.longitude, geoData.latitude, (error, forecastData) => {
+
+    darksky.forecast(longitude, latitude, (error, {summary, temperature, rainProbability:rain}) => {
         if (error) {
             return logError(error)
         }
-        // ES6 object destructuring: 
-        const {summary, temperature, rainProbability:rain} = forecastData
-        console.log(`Het is nu ${summary} in ${geoData.placeName}.\nHet is ${temperature} graden Celsius.\nEr is ${rain}% kans op regen.`)
+        console.log(`Het is nu ${summary} in ${placeName}.\nHet is ${temperature} graden Celsius.\nEr is ${rain}% kans op regen.`)
     })
 })
