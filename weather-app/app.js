@@ -18,10 +18,13 @@ mapbox.geocode(location, (error, geoData) => {
     if (error) {
         return logError(error)
     }
+    
     darksky.forecast(geoData.longitude, geoData.latitude, (error, forecastData) => {
         if (error) {
             return logError(error)
         }
-        console.log(`Het is nu ${forecastData.summary} in ${geoData.placeName}.\nHet is ${forecastData.temp} graden Celsius.\nEr is ${forecastData.rain}% kans op regen.`)
+        // ES6 object destructuring: 
+        const {summary, temperature, rainProbability:rain} = forecastData
+        console.log(`Het is nu ${summary} in ${geoData.placeName}.\nHet is ${temperature} graden Celsius.\nEr is ${rain}% kans op regen.`)
     })
 })

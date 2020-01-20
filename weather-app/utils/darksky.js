@@ -13,10 +13,13 @@ const forecast = (longitude, latitude, callback) => {
         } else if (response.body.error) { // darksky specific error
             callback("Error calling darksky: " + response.body.error)
         } else {
+            // ES6 object destructuring:
+            const {temperature, precipProbability:rainProbability} = response.body.currently 
             callback(undefined, {
                 summary: response.body.currently.summary.toLowerCase(),
-                temp: response.body.currently.temperature,
-                rain: response.body.currently.precipProbability
+                // ES6 object property value shorthand (property gets same name & value as variable):
+                temperature,
+                rainProbability
             })
         }
     })    
