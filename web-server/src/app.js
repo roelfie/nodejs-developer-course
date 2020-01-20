@@ -2,8 +2,10 @@ require('dotenv').config({path: '/Users/roelfie/.config/_roelfie/nodejs-develope
 const path = require('path')
 const express = require('express')
 const hbs = require('hbs')
+// External APIs
 const mapbox = require('./utils/mapbox')
 const darksky = require('./utils/darksky')
+const ipstack = require('./utils/ipstack')
 
 // Define paths for Express config
 const publicFolder = path.join(__dirname, '../public')
@@ -43,6 +45,7 @@ app.get('/help', (req, res) => {
     })
 })
 
+// Lookup weather for location
 app.get('/weather', (req, res) => {
     if (!req.query.location) {
         return res.send({error: "Please specify a location."})
@@ -60,6 +63,16 @@ app.get('/weather', (req, res) => {
             }
             res.send({ location: geoData, forecast })
         })
+    })
+})
+
+// Lookup geo location for ip address
+app.get('/location', (req, res) => {
+    if (!req.query.ip) {
+        return res.send({error: "Please specify an ip address."})
+    }
+    ipstack.lookup(req.query.ip, (location) => {
+        res.send(location)
     })
 })
 
