@@ -1,10 +1,10 @@
 const request = require('request')
 
-const apiKey_Mapbox = process.env.WEATHER_APP_MAPBOX_API_KEY
-const urlMapbox = `https://api.mapbox.com/geocoding/v5/mapbox.places/{PLACE}.json?access_token=${apiKey_Mapbox}&limit=1`
+const apiKey = process.env.WEATHER_APP_MAPBOX_API_KEY
+const urlTemplate = `https://api.mapbox.com/geocoding/v5/mapbox.places/{PLACE}.json?access_token=${apiKey}&limit=1`
 
 const geocode = (place, callback) => {
-    var url = urlMapbox.replace('{PLACE}', encodeURIComponent(place))
+    var url = urlTemplate.replace('{PLACE}', encodeURIComponent(place))
 
     request({url, json: true, lang: 'en'}, (error, {statusCode, body}) => {
         if (error) { // low level error

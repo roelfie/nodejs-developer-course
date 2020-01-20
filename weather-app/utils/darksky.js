@@ -1,11 +1,11 @@
 const request = require('request')
 
-const apiKey_Darksky = process.env.WEATHER_APP_DARKSKY_API_KEY
-const urlDarkSky = `https://api.darksky.net/forecast/${apiKey_Darksky}/{LATITUDE},{LONGITUDE}?lang=nl&units=si`
+const apiKey = process.env.WEATHER_APP_DARKSKY_API_KEY
+const urlTemplate = `https://api.darksky.net/forecast/${apiKey}/{LATITUDE},{LONGITUDE}?lang=nl&units=si`
 
 const forecast = (longitude, latitude, callback) => {
-    var url = urlDarkSky.replace('{LONGITUDE}', encodeURIComponent(longitude))
-                        .replace('{LATITUDE}', encodeURIComponent(latitude))
+    url = urlTemplate.replace('{LONGITUDE}', encodeURIComponent(longitude))
+                     .replace('{LATITUDE}', encodeURIComponent(latitude))
 
     request({url, json: true, lang: 'en'}, (error, {body}) => {
         if (error) { // low level error
@@ -13,6 +13,7 @@ const forecast = (longitude, latitude, callback) => {
         } else if (body.error) { // darksky specific error
             callback("Error calling darksky: " + body.error)
         } else {
+            console.log(body)
             // ES6 object destructuring:
             const {temperature, precipProbability:rainProbability} = body.currently 
             callback(undefined, {
