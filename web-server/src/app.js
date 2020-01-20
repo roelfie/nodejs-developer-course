@@ -47,6 +47,19 @@ app.get('/weather', (req, res) => {
     })
 })
 
+// Setup 404 pages
+app.get('/help/*', (req, res) => {
+    res.render('404', {
+        errorMessage: 'Help page not found.'
+    })
+})
+
+app.get('*', (req, res) => {
+    res.render('404', {
+        errorMessage: 'Page not found.'
+    })
+})
+
 app.listen(3000, () => {
     console.log('Express server running on port 3000.')
 })
