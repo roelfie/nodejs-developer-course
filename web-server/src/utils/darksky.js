@@ -17,7 +17,7 @@ const forecast = (longitude, latitude, callback) => {
             // ES6 object destructuring:
             const {temperature, precipProbability:rainProbability} = body.currently 
             callback(undefined, {
-                summary: body.currently.summary.toLowerCase(),
+                summary: body.currently.summary,
                 // ES6 object property value shorthand (property gets same name & value as variable):
                 temperature,
                 rainProbability
