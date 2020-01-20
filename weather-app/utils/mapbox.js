@@ -6,15 +6,15 @@ const urlMapbox = `https://api.mapbox.com/geocoding/v5/mapbox.places/{PLACE}.jso
 const geocode = (place, callback) => {
     var url = urlMapbox.replace('{PLACE}', encodeURIComponent(place))
 
-    request({url: url, json: true, lang: 'en'}, (error, response) => {
+    request({url, json: true, lang: 'en'}, (error, {statusCode, body}) => {
         if (error) { // low level error
             callback("Error calling mapbox: " + error)
-        } else if (response.statusCode !== 200) { // mapbox specific error
-            callback("Error calling mapbox: " + response.statusCode + " " + response.body.message)
-        } else if (response.body.features.length === 0) { // mapbox specific error
+        } else if (statusCode !== 200) { // mapbox specific error
+            callback("Error calling mapbox: " + statusCode + " " + body.message)
+        } else if (body.features.length === 0) { // mapbox specific error
             callback("Error calling mapbox: No place found with name " + place)
         } else {
-            var result = response.body.features[0]
+            var result = body.features[0]
             callback(undefined, {
                 placeName: result.place_name,
                 longitude: result.center[0],

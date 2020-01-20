@@ -7,16 +7,16 @@ const forecast = (longitude, latitude, callback) => {
     var url = urlDarkSky.replace('{LONGITUDE}', encodeURIComponent(longitude))
                         .replace('{LATITUDE}', encodeURIComponent(latitude))
 
-    request({url: url, json: true, lang: 'en'}, (error, response) => {
+    request({url, json: true, lang: 'en'}, (error, {body}) => {
         if (error) { // low level error
             callback("Error calling darksky: " + error)
-        } else if (response.body.error) { // darksky specific error
-            callback("Error calling darksky: " + response.body.error)
+        } else if (body.error) { // darksky specific error
+            callback("Error calling darksky: " + body.error)
         } else {
             // ES6 object destructuring:
-            const {temperature, precipProbability:rainProbability} = response.body.currently 
+            const {temperature, precipProbability:rainProbability} = body.currently 
             callback(undefined, {
-                summary: response.body.currently.summary.toLowerCase(),
+                summary: body.currently.summary.toLowerCase(),
                 // ES6 object property value shorthand (property gets same name & value as variable):
                 temperature,
                 rainProbability
