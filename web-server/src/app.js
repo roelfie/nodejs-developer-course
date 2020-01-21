@@ -12,6 +12,7 @@ const viewsFolder = path.join(__dirname, "../templates/views")
 const partialsFolder = path.join(__dirname, "../templates/partials")
 
 const app = express()
+const port = process.env.PORT || 3000 // provided by Heroku (default 3000 if not run on Heroku)
 
 // Setup Express view engine (handlebars) and templates directory (default is 'views').
 app.set('view engine', 'hbs') 
@@ -78,6 +79,6 @@ app.get('*', (req, res) => {
     })
 })
 
-app.listen(3000, () => {
-    console.log('Express server running on port 3000.')
+app.listen(port, () => {
+    console.log('Express server running on port ' + port)
 })
