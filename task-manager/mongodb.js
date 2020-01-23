@@ -46,9 +46,24 @@ const findOneTaskBy = (findBy) => {
     })
 }
 
-// const findOneTaskById = (value) => findOneTaskBy({ _id: new ObjectID(value) })
-// const findOneTaskByDescription = (value) => findOneTaskBy({ description: value })
+const findOneTaskById = (value) => findOneTaskBy({ _id: new ObjectID(value) })
+const findOneTaskByDescription = (value) => findOneTaskBy({ description: value })
 
+
+// STEP 1
+// Cleanup database
+client.connect((err, client) => {
+    if (err) {
+        return console.log('Error establishing connection: ' + err)
+    }
+    const db = client.db(DB_NAME)
+    const coll = db.collection(COLLECTION_TASKS)
+    coll.drop()
+        .then((result) => {console.log('Collection dropped.')})
+        .catch((error) => {console.log('Error occurred during drop collection: ' + error)})
+})
+
+// STEP 2
 // Insert tasks (some completed, some uncompleted)
 insertTasks([
     { description: 'Shopping', completed: false },
@@ -59,9 +74,9 @@ insertTasks([
     { description: 'Buy clothes', completed: true }
 ])
 
-// findOneTaskByDescription('Repar car')
+// STEP 3
 // findOneTaskById("5e29f161ac24c9493afe5f65")
-
+// findOneTaskByDescription('Repar car')
 // Find all completed tasks
 client.connect((err, client) => {
     if (err) {
@@ -69,11 +84,30 @@ client.connect((err, client) => {
     }
     const db = client.db(DB_NAME)
     const coll = db.collection(COLLECTION_TASKS)
-    const cursor = coll.find({ completed: true }, {sort: {description: 1}})
+    const cursor = coll.find({ description: 'Go fishing' }, {sort: {description: 1}})
     cursor.toArray((error, documents) => {
         if (error) {
-            return console.log(error)
+            return console.log('Error while retrieving tasks: ' + error)
         }
-        console.log(documents)
+        console.log('Found tasks: ' + documents)
     })
 })
+
+// STEP 4
+// Update stuff
+client.connect()
+    .then((client) => {
+        const db = client.db(DB_NAME)
+        const tasks = db.collection(COLLECTION_TASKS)
+        const promise = tasks.updateMany(
+            {description: 'Go fishing'},
+            {$set: {description: 'Ga vissen!'}})
+
+        promise.then((result) => {console.log('Update succeeded. Result: ' + result)})
+               .catch((err) => {console.log('Updated failed. Error: ' + err)})
+    })
+    .catch((err) => {console.log('Connection failed. Error: ' + err)})
+
+// If we run this script, in step 3 it doesn't find anything,
+// and in step 4 it doesn't update anything.
+// TODO I caused by callbacks & promises, but try to explain what exactly is happening.
