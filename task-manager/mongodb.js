@@ -110,4 +110,4 @@ client.connect()
 
 // If we run this script, in step 3 it doesn't find anything,
 // and in step 4 it doesn't update anything.
-// TODO I caused by callbacks & promises, but try to explain what exactly is happening.
+// TODO Is caused by callbacks & promises, but try to explain what exactly is happening.
