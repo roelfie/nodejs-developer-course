@@ -1,5 +1,6 @@
 const express = require('express')
 require('./db/mongoose') // will ensure mongoose is connected to the database
+const validateFields = require('./utils/validator')
 // const userRouter = require('./routers/user')
 // const taskRouter = require('./routers/task')
 
@@ -13,62 +14,113 @@ app.use(express.json()) // Expres will automatically parse incoming JSON and sto
 // app.use(userRouter)
 // app.use(taskRouter)
 
-app.post('/users', (req, res) => {
+app.post('/users', async (req, res) => {
     const user = new User(req.body)
-    user.save().then(() => {
+    try {
+        await user.save()
         res.status(201).send(user)
-    }).catch((err) => {
+    } catch (e) {
         res.status(400).send(err)
-    })
+    }
 })
 
-app.get('/users', (req, res) => {
-    User.find({}).then((users) => {
+app.get('/users', async (req, res) => {
+    try {
+        const users = await User.find({})
         res.send(users)
-    }).catch((e) => {
+    } catch(e) {
         res.status(500).send()
-    })
+    }
 })
 
-app.get('/users/:id', (req, res) => {
-    User.findById(req.params.id).then((user) => {
+app.get('/users/:id', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id)
         if (!user) {
-            res.status(404).send()
-        } else {
-            res.send(user)
+            return res.status(404).send()
         }
-    }).catch((e) => {
+        res.send(user)
+    } catch (e) {
         res.status(500).send(e)
-    })
+    }
 })
 
-app.post('/tasks', (req, res) => {
+app.patch('/users/:id', async (req, res) => {
+    if (!validateFields(req.body, User.schema, ['name','email'])) {
+        return res.status(400).send({error: 'One or more fields can not be updated.'})
+    }
+
+    try {
+        const user = await User.findByIdAndUpdate(
+            req.params.id, 
+            req.body, 
+            { 
+                new: true, // return new user instead of original one.
+                runValidators: true
+            })
+        if (!user) {
+            return res.status(404).send()
+        }
+        res.send(user)
+    } catch (e) {
+        // TODO distinguish between server errors (500) and validation errors (400)
+        res.status(400).send(e)
+    }
+})
+
+app.post('/tasks', async (req, res) => {
     const task = new Task(req.body)
-    task.save().then(() => {
+    try {
+        await task.save()
         res.status(201).send(task)
-    }).catch((err) => {
+    } catch (err) {
         res.status(400).send(err)
-    })
+    }
 })
 
-app.get('/tasks', (req, res) => {
-    Task.find({}).then((tasks) => {
+app.get('/tasks', async (req, res) => {
+    try {
+        const tasks = await Task.find({})
         res.send(tasks)
-    }).catch((e) => {
+    } catch (e) {
         res.status(500).send()
-    })
+    }
 })
 
-app.get('/tasks/:id', (req, res) => {
-    Task.findById(req.params.id).then((task) => {
+app.get('/tasks/:id', async (req, res) => {
+    try {
+        const task = await Task.findById(req.params.id)
         if (!task) {
-            res.status(404).send()
-        } else {
-            res.send(task)
+            return res.status(404).send()
         }
-    }).catch((e) => {
+        res.send(task)
+    } catch (e) {
         res.status(500).send(e)
-    })
+    }
+})
+
+app.patch('/tasks/:id', async (req, res) => {
+    console.log('going validating')
+    if (!validateFields(req.body, Task.schema)) {
+        return res.status(400).send({error: 'One or more fields can not be updated.'})
+    }
+
+    try {
+        const task = await Task.findByIdAndUpdate(
+            req.params.id, 
+            req.body, 
+            { 
+                new: true, // return new task instead of original one.
+                runValidators: true
+            })
+        if (!task) {
+            return res.status(404).send()
+        }
+        res.send(task)
+    } catch (e) {
+        // TODO distinguish between server errors (500) and validation errors (400)
+        res.status(400).send(e)
+    }
 })
 
 app.listen(port, () => {
