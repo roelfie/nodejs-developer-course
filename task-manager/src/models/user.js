@@ -11,6 +11,8 @@ const userSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
+        // Unique because it's used as the login key
+        unique: true,
         trim: true,
         lowercase: true,
         validate(value) {
@@ -41,6 +43,23 @@ const userSchema = new mongoose.Schema({
     }
 })
 
+// Custom method to find user by credentials
+userSchema.statics.findByCredentials = async (email, password) => {
+    const user = await User.findOne({ email })
+    if (!user) {
+        throw new Error('No user found for email ' + email)
+    }
+
+    // TODO On pwd save we tell bcryptjs to use 8 cycles, here we don't. How does bcryptjs know how to compare the passwords?
+    const isMatch = await bcrypt.compare(password, user.password)
+    if (!isMatch) {
+        throw new Error('Unable to login')
+    }
+
+    return user
+}
+
+// Hash password before saving
 userSchema.pre('save', async function(next) {
     const user = this
     // Only hash the password if it has changed
