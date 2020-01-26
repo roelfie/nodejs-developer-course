@@ -39,21 +39,21 @@ router.get('/users/:id', async (req, res) => {
 
 
 router.patch('/users/:id', async (req, res) => {
-    if (!validateFields(req.body, User.schema, ['name','email'])) {
+    if (!validateFields(req.body, User.schema, ['name','email', 'password'])) {
         return res.status(400).send({error: 'One or more fields can not be updated.'})
     }
 
     try {
-        const user = await User.findByIdAndUpdate(
-            req.params.id, 
-            req.body, 
-            { 
-                new: true, // return new user instead of original one.
-                runValidators: true
-            })
+        // We're not using findByIdAndUpdate, because the pre-save hook (for pwd hashing) doesn't work with it.
+        // See https://mongoosejs.com/docs/middleware.html
+        // const user = await User.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true})
+        const user = await User.findById(req.params.id)
         if (!user) {
             return res.status(404).send()
         }
+        const updatedFields = Object.keys(req.body)
+        updatedFields.forEach((key) => user[key] = req.body[key])
+        await user.save() // mongoose middleware (pre-save hook) for hashing pwd is executed
         res.send(user)
     } catch (e) {
         // TODO distinguish between server errors (500) and validation errors (400)
