@@ -1,6 +1,11 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+
+// Random 256 bits key for JWT signing
+// See https://auth0.com/blog/brute-forcing-hs256-is-possible-the-importance-of-using-strong-keys-to-sign-jwts/
+const JWT_SIGNING_KEY = '728E49185E56272E3F1F9CC1C6C97'
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -40,9 +45,32 @@ const userSchema = new mongoose.Schema({
                 throw new Error('Age must be a postive number')
             }
         }
-    }
+    },
+    // Keep track of the authentication token(s) issues for this user
+    // This adds support for logout (if received token is not in this list, we won't accept it)
+    tokens: [{
+        token: {
+            type: String,
+            required: true
+        }
+    }]
 })
 
+// Instance methods
+// Generating a JWT (with default algorithm HMAC SHA256 (=HS256))
+// See https://www.npmjs.com/package/jsonwebtoken
+userSchema.methods.generateAuthToken = async function() {
+    const user = this
+    const token = jwt.sign({ _id: user._id.toString() }, JWT_SIGNING_KEY)
+
+    // Save the issues token on the user
+    user.tokens = user.tokens.concat({token})
+    await user.save()
+
+    return token
+}
+
+// Model methods (static)
 // Custom method to find user by credentials
 userSchema.statics.findByCredentials = async (email, password) => {
     const user = await User.findOne({ email })
