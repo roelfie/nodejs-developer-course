@@ -1,11 +1,9 @@
+const constants = require('../utils/constants')
 const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
-// Random 256 bits key for JWT signing
-// See https://auth0.com/blog/brute-forcing-hs256-is-possible-the-importance-of-using-strong-keys-to-sign-jwts/
-const JWT_SIGNING_KEY = '728E49185E56272E3F1F9CC1C6C97'
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -61,7 +59,8 @@ const userSchema = new mongoose.Schema({
 // See https://www.npmjs.com/package/jsonwebtoken
 userSchema.methods.generateAuthToken = async function() {
     const user = this
-    const token = jwt.sign({ _id: user._id.toString() }, JWT_SIGNING_KEY)
+    const payload = { _id: user._id.toString() }
+    const token = jwt.sign(payload, constants.JWT_SIGNING_KEY)
 
     // Save the issues token on the user
     user.tokens = user.tokens.concat({token})

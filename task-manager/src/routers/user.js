@@ -1,8 +1,8 @@
 const express = require('express')
 const User = require('../models/user')
 const validateFields = require('../utils/validator')
+const auth = require('../middleware/authentication')
 const router = new express.Router()
-
 
 router.post('/users', async (req, res) => {
     const user = new User(req.body)
@@ -22,12 +22,12 @@ router.post('/users/login', async (req, res) => {
         const token = await user.generateAuthToken()
         res.send({ user, token })
     } catch (e) {
-        res.status(400).send()
+        res.status(400).send(e)
     }
 })
 
 
-router.get('/users', async (req, res) => {
+router.get('/users', auth.authenticate, async (req, res) => {
     try {
         const users = await User.find({})
         res.send(users)
@@ -37,7 +37,13 @@ router.get('/users', async (req, res) => {
 })
 
 
-router.get('/users/:id', async (req, res) => {
+router.get('/users/me', auth.authenticate, async (req, res) => {
+    // The authentication middleware has authenticated and stored logged in user on request
+    res.send(req.user)
+})
+
+
+router.get('/users/:id', auth.authenticate, async (req, res) => {
     try {
         const user = await User.findById(req.params.id)
         if (!user) {
@@ -50,7 +56,7 @@ router.get('/users/:id', async (req, res) => {
 })
 
 
-router.patch('/users/:id', async (req, res) => {
+router.patch('/users/:id', auth.authenticate, async (req, res) => {
     if (!validateFields(req.body, User.schema, ['name','email', 'password'])) {
         return res.status(400).send({error: 'One or more fields can not be updated.'})
     }
@@ -74,7 +80,7 @@ router.patch('/users/:id', async (req, res) => {
 })
 
 
-router.delete('/users/:id', async (req, res) => {
+router.delete('/users/:id', auth.authenticate, async (req, res) => {
     try {
         const user = await User.findByIdAndDelete(req.params.id)
         if (!user) {
