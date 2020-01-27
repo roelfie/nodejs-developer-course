@@ -4,6 +4,8 @@ const validateFields = require('../utils/validator')
 const auth = require('../middleware/authentication')
 const router = new express.Router()
 
+// CREATE USER
+
 router.post('/users', async (req, res) => {
     const user = new User(req.body)
     try {
@@ -16,6 +18,8 @@ router.post('/users', async (req, res) => {
 })
 
 
+// LOGIN
+
 router.post('/users/login', async (req, res) => {
     try {
         const user = await User.findByCredentials(req.body.email, req.body.password)
@@ -26,6 +30,8 @@ router.post('/users/login', async (req, res) => {
     }
 })
 
+
+// LOGOUT
 
 router.post('/users/logout', auth.authenticate, async (req, res) => {
     try {
@@ -38,6 +44,8 @@ router.post('/users/logout', auth.authenticate, async (req, res) => {
 })
 
 
+// LOGOUT (all tokens)
+
 router.post('/users/logoutAll', auth.authenticate, async (req, res) => {
     try {
         req.user.tokens = []
@@ -49,6 +57,8 @@ router.post('/users/logoutAll', auth.authenticate, async (req, res) => {
 })
 
 
+// LIST USERS
+
 router.get('/users', auth.authenticate, async (req, res) => {
     try {
         const users = await User.find({})
@@ -59,42 +69,26 @@ router.get('/users', auth.authenticate, async (req, res) => {
 })
 
 
+// GET USER PROFILE (of logged in user)
+
 router.get('/users/me', auth.authenticate, async (req, res) => {
     // The authentication middleware has authenticated and stored logged in user on request
     res.send(req.user)
 })
 
 
-router.get('/users/:id', auth.authenticate, async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id)
-        if (!user) {
-            return res.status(404).send()
-        }
-        res.send(user)
-    } catch (e) {
-        res.status(500).send(e)
-    }
-})
+// UPDATE USER (only yourself!)
 
-
-router.patch('/users/:id', auth.authenticate, async (req, res) => {
+router.patch('/users/me', auth.authenticate, async (req, res) => {
     if (!validateFields(req.body, User.schema, ['name','email', 'password'])) {
         return res.status(400).send({error: 'One or more fields can not be updated.'})
     }
 
     try {
-        // We're not using findByIdAndUpdate, because the pre-save hook (for pwd hashing) doesn't work with it.
-        // See https://mongoosejs.com/docs/middleware.html
-        // const user = await User.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true})
-        const user = await User.findById(req.params.id)
-        if (!user) {
-            return res.status(404).send()
-        }
         const updatedFields = Object.keys(req.body)
-        updatedFields.forEach((key) => user[key] = req.body[key])
-        await user.save() // mongoose middleware (pre-save hook) for hashing pwd is executed
-        res.send(user)
+        updatedFields.forEach((key) => req.user[key] = req.body[key])
+        await req.user.save() // mongoose middleware (pre-save hook) for hashing pwd is executed
+        res.send(req.user)
     } catch (e) {
         // TODO distinguish between server errors (500) and validation errors (400)
         res.status(400).send(e)
@@ -102,13 +96,12 @@ router.patch('/users/:id', auth.authenticate, async (req, res) => {
 })
 
 
-router.delete('/users/:id', auth.authenticate, async (req, res) => {
+// DELETE USER (only yourself!)
+
+router.delete('/users/me', auth.authenticate, async (req, res) => {
     try {
-        const user = await User.findByIdAndDelete(req.params.id)
-        if (!user) {
-            return res.status(404).send()
-        }
-        res.send(user)
+        await req.user.remove()
+        res.send(req.user)
     } catch (e) {
         res.status(500).send()
     }
