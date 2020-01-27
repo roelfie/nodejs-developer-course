@@ -46,6 +46,7 @@ const userSchema = new mongoose.Schema({
     },
     // Keep track of the authentication token(s) issues for this user
     // This adds support for logout (if received token is not in this list, we won't accept it)
+    // Multiple tokens, because you can be logged in from multiple devices at the same time
     tokens: [{
         token: {
             type: String,

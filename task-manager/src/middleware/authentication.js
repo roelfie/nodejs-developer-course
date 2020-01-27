@@ -12,6 +12,8 @@ const authenticate = async (req, res, next) => {
         if (!user) {
             throw new Error('User doesn\'t exist or token not valid for user')
         }
+        
+        req.token = token // remind what token was used to login, to support logout
         req.user = user
         next()
     } catch (e) {
