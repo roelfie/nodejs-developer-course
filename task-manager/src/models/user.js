@@ -58,7 +58,7 @@ const userSchema = new mongoose.Schema({
 // Instance methods
 // Generating a JWT (with default algorithm HMAC SHA256 (=HS256))
 // See https://www.npmjs.com/package/jsonwebtoken
-userSchema.methods.generateAuthToken = async function() {
+userSchema.methods.generateAuthToken = async function() { // don't use arrow function, because we need 'this.'
     const user = this
     const payload = { _id: user._id.toString() }
     const token = jwt.sign(payload, constants.JWT_SIGNING_KEY)
@@ -68,6 +68,18 @@ userSchema.methods.generateAuthToken = async function() {
     await user.save()
 
     return token
+}
+
+// Override toJSON to hide sensitive fields (like password)
+// (toJSON is part of the JSON specification and allows you to override the default serialization)
+userSchema.methods.toJSON = function() { // don't use arrow function, because we need 'this.'
+    const user = this
+    const userPublic = user.toObject()
+
+    delete userPublic.password
+    delete userPublic.tokens
+
+    return userPublic
 }
 
 // Model methods (static)
