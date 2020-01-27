@@ -22,14 +22,33 @@ router.post('/tasks', auth.authenticate, async (req, res) => {
 
 
 // GET /tasks?completed=true
+// GET /tasks?limit=10&skip=20   (3nd page of 10 results)
+// GET /tasks?sortBy=createdAt:desc
 router.get('/tasks', auth.authenticate, async (req, res) => {
     const match = {}
+    const sort = {}
+
     if (req.query.completed) {
         match.completed = (req.query.completed === 'true')
     }
 
+    if (req.query.sortBy) {
+        const parts = req.query.sortBy.split(':')
+        sort[parts[0]] = (parts[1] === 'desc' ? -1 : 1)
+    }
+
     try {
-        await req.user.populate({ path: 'tasks', match }).execPopulate()
+        await req.user.populate({ 
+            path: 'tasks', 
+            match,
+            // The following options for pagination mimic pagination with MongoDB cursors
+            // (https://www.codementor.io/@arpitbhayani/fast-and-efficient-pagination-in-mongodb-9095flbqr). 
+            options: {
+                limit: parseInt(req.query.limit),
+                skip: parseInt(req.query.skip),
+                sort
+            }
+        }).execPopulate()
         res.send(req.user.tasks) // tasks is a virtual property in the user model
     } catch (e) {
         console.log(e)
