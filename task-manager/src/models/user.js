@@ -55,6 +55,13 @@ const userSchema = new mongoose.Schema({
     }]
 })
 
+// Specify foreign key relationship Task -> Owner
+userSchema.virtual('tasks', {
+    ref: 'Task',
+    localField: '_id',
+    foreignField: 'owner'
+})
+
 // Instance methods
 // Generating a JWT (with default algorithm HMAC SHA256 (=HS256))
 // See https://www.npmjs.com/package/jsonwebtoken
