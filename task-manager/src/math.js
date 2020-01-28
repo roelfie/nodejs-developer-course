@@ -7,7 +7,7 @@ const addAsync = (a, b) => {
                 return reject('Both nubers must be non-negative!')
             }
             resolve(a+b)
-        }, 2000)
+        }, 500)
     })
 }
 
