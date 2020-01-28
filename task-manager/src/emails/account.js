@@ -10,7 +10,7 @@ const sendWelcomeEmail = (to, name) => {
         subject: 'Thanks for joining!',
         text: `Welcome to the task manager app, ${name}.`,
         html: `<h1>Welcome</h1> <p>Welcome to the task manager app, ${name}.</p>`
-    });
+    })
 }
 
 const sendGoodbyeEmail = (to, name) => {
