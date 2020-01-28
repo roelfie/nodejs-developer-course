@@ -7,7 +7,7 @@
     "start": "node src/index.js",
     "debug": "node inspect src/index.js",
     "dev": "nodemon src/index.js",
-    "test" : "jest"
+    "test" : "jest --watch"
   },
   "keywords": [],
   "author": "",
