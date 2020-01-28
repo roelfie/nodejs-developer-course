@@ -1,4 +1,3 @@
-const constants = require('../utils/constants')
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
 
@@ -7,7 +6,7 @@ const User = require('../models/user')
 const authenticate = async (req, res, next) => {
     try {
         const token = req.header('Authorization').replace('Bearer ', '')
-        const payload = jwt.verify(token, constants.JWT_SIGNING_KEY)
+        const payload = jwt.verify(token, process.env.JWT_SIGNING_KEY)
         const user = await User.findOne({ _id: payload._id, 'tokens.token' : token })
         if (!user) {
             throw new Error('User doesn\'t exist or token not valid for user')

@@ -1,4 +1,3 @@
-require('dotenv').config({path: process.env.NODEJS_COURSE_CONF_LOCATION})
 const sendgridMail = require('@sendgrid/mail');
 
 sendgridMail.setApiKey(process.env.TASKMANAGER_SENDGRID_API_KEY);

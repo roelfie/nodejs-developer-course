@@ -1,3 +1,4 @@
+require('dotenv').config({path: process.env.NODEJS_COURSE_CONF_LOCATION})
 const express = require('express')
 require('./db/mongoose') // will ensure mongoose is connected to the database
 const maintenance = require('./middleware/maintenance')

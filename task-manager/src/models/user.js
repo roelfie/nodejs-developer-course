@@ -1,4 +1,3 @@
-const constants = require('../utils/constants')
 const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
@@ -70,7 +69,7 @@ userSchema.virtual('tasks', {
 userSchema.methods.generateAuthToken = async function() { // don't use arrow function, because we need 'this.'
     const user = this
     const payload = { _id: user._id.toString() }
-    const token = jwt.sign(payload, constants.JWT_SIGNING_KEY)
+    const token = jwt.sign(payload, process.env.JWT_SIGNING_KEY)
 
     // Save the issues token on the user
     user.tokens = user.tokens.concat({token})
